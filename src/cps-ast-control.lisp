@@ -2,80 +2,112 @@
 
 ;;; Block and Return-From
 
+(defvar *cps-block-environment* nil "Lexical block names mapped to their CPS exit continuations.")
+
+(define-condition unbound-cps-block (error)
+  ((name :initarg :name :reader unbound-cps-block-name))
+  (:report (lambda (condition stream)
+             (format stream "CPS RETURN-FROM references unknown block ~S."
+                     (unbound-cps-block-name condition)))))
+
+(defun %lookup-cps-block (name)
+  (or (cdr (assoc name *cps-block-environment* :test #'eq))
+      (error 'unbound-cps-block :name name)))
+
 (defmethod cps-transform-ast ((node ast-block) k)
-  "Transform block with named exit point.
-The block creates a catch tag for return-from."
+  "Transform a lexical block into an explicit exit continuation."
   (let* ((name (ast-block-name node))
          (body (ast-block-body node))
-         (result (gensym "RESULT")))
-    ;; The continuation for the body is a special one that returns from the block
-    (list 'block name
-          (cps-transform-sequence body
-                                  (list 'lambda (list result)
-                                        (list 'return-from name
-                                              (list 'funcall k result)))))))
+         (exit-k (gensym "BLOCK-EXIT"))
+         (*cps-block-environment*
+           (acons name exit-k *cps-block-environment*)))
+    (list 'let (list (list exit-k k))
+          (cps-transform-sequence body exit-k))))
 
 (defmethod cps-transform-ast ((node ast-return-from) k)
-  "Transform return-from to exit the block with a value."
+  "Transform RETURN-FROM by invoking its nearest lexical block continuation."
+  (declare (ignore k))
   (let* ((name (ast-return-from-name node))
+         (exit-k (%lookup-cps-block name))
          (value (ast-return-from-value node))
-         (v (gensym "VAL")))
-    ;; Evaluate the value, then return from the block
-    ;; Note: k is ignored since we're doing a non-local exit
+         (result (gensym "RETURN-VALUE")))
     (cps-transform-ast value
-                       (list 'lambda (list v)
-                             (list 'return-from name v)))))
+                       (list 'lambda (list result)
+                             (list 'funcall exit-k result)))))
 
 ;;; Tagbody and Go
 
+(defun %lookup-cps-tag (tag)
+  (or
+    (cdr (assoc tag *cps-tagbody-environment* :test #'eq))
+    (error 'unbound-cps-tag :tag tag)))
+
+(define-condition unbound-cps-tag (error)
+  ((tag :initarg :tag :reader unbound-cps-tag-tag))
+  (:report
+    (lambda (condition stream)
+      (format
+        stream
+        "CPS GO references unknown tag ~S."
+        (unbound-cps-tag-tag condition)))))
+
+(defvar *cps-tagbody-environment* nil
+  "Lexical tag names mapped to their CPS label continuations.")
+
 (defun cps-transform-tagbody-section (forms continue-form)
-  "Transform one tagbody section and continue with CONTINUE-FORM when done.
-CONTINUE-FORM is either `(go <next-tag>)' for fallthrough to the next section
-or `(funcall k nil)' when the whole tagbody finishes." 
+  "Transform one TAGBODY section, then invoke its fallthrough continuation."
   (let ((section-result (gensym "TAGBODY-RESULT")))
     (%cps-transform-sequence-step
-     forms
-     (list 'lambda (list section-result)
-           (list 'declare (list 'ignore section-result))
-           continue-form)
-     continue-form)))
+      forms
+      (list
+        'lambda
+        (list section-result)
+        (list 'declare (list 'ignore section-result))
+        continue-form)
+      continue-form)))
 
 (defmethod cps-transform-ast ((node ast-tagbody) k)
-  "Transform tagbody with labeled sections.
-Uses a tag table to map tags to their continuations."
+  "Transform TAGBODY into mutually recursive local tag continuations."
   (let ((tags (ast-tagbody-tags node)))
-    (cons 'tagbody
-          (append (loop for remaining on tags
-                        for entry = (car remaining)
-                        for tag = (car entry)
-                        for forms = (cdr entry)
-                        for continue-form = (if (cdr remaining)
-                                                (list 'go (caar (cdr remaining)))
-                                                (list 'funcall k nil))
-                        append (list tag (cps-transform-tagbody-section forms continue-form)))
-                  (list (list 'funcall k nil))))))
+    (if (null tags)
+        (list (quote funcall) k nil)
+        (let* ((tag-continuations
+                 (loop for entry in tags
+                       collect (cons (car entry) (gensym "TAG-CONTINUATION"))))
+               (*cps-tagbody-environment*
+                 (append tag-continuations *cps-tagbody-environment*))
+               (bindings
+                 (loop for remaining-tags on tags
+                       for remaining-continuations on tag-continuations
+                       for entry = (car remaining-tags)
+                       for continuation = (cdar remaining-continuations)
+                       for next-continuation =
+                         (and (cdr remaining-continuations)
+                              (cdadr remaining-continuations))
+                       for continue-form =
+                         (if next-continuation
+                             (list (quote funcall)
+                                   (list (quote function) next-continuation))
+                             (list (quote funcall) k nil))
+                       collect
+                         (list continuation nil
+                               (cps-transform-tagbody-section
+                                 (cdr entry) continue-form)))))
+          (list (quote labels) bindings
+                (list (quote funcall)
+                      (list (quote function)
+                            (cdar tag-continuations))))))))
 
 (defmethod cps-transform-ast ((node ast-go) k)
-  "Transform go to jump to a tag."
-  (let ((tag (ast-go-tag node)))
-    ;; k is ignored since go performs a non-local jump
-    (declare (ignore k))
-    (list 'go tag)))
+  "Transform GO by invoking its nearest lexical tag continuation."
+  (declare (ignore k))
+  (list (quote funcall)
+        (list (quote function)
+              (%lookup-cps-tag (ast-go-tag node)))))
 
 ;;; Catch and Throw
 
-(defmethod cps-transform-ast ((node ast-catch) k)
-  "Transform catch with dynamic tag."
-  (let* ((tag-expr (ast-catch-tag node))
-         (body (ast-catch-body node))
-         (tag-v (gensym "TAG"))
-         (result (gensym "RESULT")))
-    (cps-transform-ast tag-expr
-                       (list 'lambda (list tag-v)
-                             (list 'catch tag-v
-                                   (cps-transform-sequence body
-                                                           (list 'lambda (list result)
-                                                                 (list 'funcall k result))))))))
+(defmethod cps-transform-ast ((node ast-catch) k) "Transform catch with dynamic tag." (let* ((tag-expr (ast-catch-tag node)) (body (ast-catch-body node)) (tag-v (gensym "TAG")) (result (gensym "RESULT"))) (cps-transform-ast tag-expr (list (quote lambda) (list tag-v) (list (quote funcall) k (list (quote catch) tag-v (cps-transform-sequence body (list (quote lambda) (list result) result))))))))
 
 (defmethod cps-transform-ast ((node ast-throw) k)
   "Transform throw to unwind to matching catch."

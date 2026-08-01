@@ -221,3 +221,24 @@
       (label node)
     (declare (ignore label))
     (expect (%cps-transform-succeeds-p node) :to-be-truthy)))
+
+(describe-sequential "CPS lexical control-flow environments"
+  (it "resolves return-from through its enclosing block"
+    (let ((node
+            (cl-cc/ast:make-ast-block
+             :name 'done
+             :body
+             (list (cl-cc/ast:make-ast-return-from
+                    :name 'done
+                    :value (%cps-coverage-int 1))))))
+      (expect (%cps-transform-succeeds-p node) :to-be-truthy)))
+
+  (it "resolves go through its enclosing tagbody"
+    (let ((node
+            (cl-cc/ast:make-ast-tagbody
+             :tags
+             (list (cons 'start
+                         (list (cl-cc/ast:make-ast-go :tag 'finish)))
+                   (cons 'finish
+                         (list (%cps-coverage-int 1)))))))
+      (expect (%cps-transform-succeeds-p node) :to-be-truthy))))
