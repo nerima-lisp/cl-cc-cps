@@ -14,13 +14,7 @@
   "Build a minimal integer AST node for CPS coverage fixtures."
   (cl-cc/ast:make-ast-int :value value))
 
-(defun %cps-transform-succeeds-p (node)
-  "Return true when NODE can be transformed by cps-transform-ast*."
-  (handler-case
-      (progn
-        (cl-cc/cps:cps-transform-ast* node)
-        t)
-    (error () nil)))
+(defun %cps-transform-succeeds-p (node) "Return true when NODE can be transformed by cps-transform-ast*." (cl-cc/cps:cps-transform-ast* node) t)
 
 (describe-sequential "CPS AST transformation coverage matrix"
   (it-each
@@ -69,17 +63,13 @@
          :name 'done
          :body (list (%cps-coverage-int 1))))
 
-       ("ast-return-from"
-        (cl-cc/ast:make-ast-return-from
-         :name 'done
-         :value (%cps-coverage-int 1)))
+       ("ast-return-from" (cl-cc/ast:make-ast-block :name (quote done) :body (list (cl-cc/ast:make-ast-return-from :name (quote done) :value (%cps-coverage-int 1)))))
 
        ("ast-tagbody"
         (cl-cc/ast:make-ast-tagbody
          :tags (list (cons 'start (list (%cps-coverage-int 1))))))
 
-       ("ast-go"
-        (cl-cc/ast:make-ast-go :tag 'start))
+       ("ast-go" (cl-cc/ast:make-ast-tagbody :tags (list (cons (quote start) (list (cl-cc/ast:make-ast-go :tag (quote start)))))))
 
        ("ast-catch"
         (cl-cc/ast:make-ast-catch
