@@ -210,7 +210,7 @@
       "cps-transform-ast* succeeds for ~A"
       (label node)
     (declare (ignore label))
-    (expect (%cps-transform-succeeds-p node) :to-be-truthy)))
+    (expect (%cps-transform-succeeds-p (eval node)) :to-be-truthy)))
 
 (describe-sequential "CPS lexical control-flow environments"
   (it "resolves return-from through its enclosing block"
