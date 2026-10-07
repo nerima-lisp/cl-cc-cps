@@ -31,7 +31,7 @@
   ;; Single source of truth for the version: flake.nix reads this form, and
   ;; release.yml (if/when added) would refuse to publish a tag that
   ;; disagrees with it.
-  :version "0.1.0"
+  :version "0.1.1"
   :homepage "https://github.com/nerima-lisp/cl-cc-cps"
   :bug-tracker "https://github.com/nerima-lisp/cl-cc-cps/issues"
   :source-control (:git "https://github.com/nerima-lisp/cl-cc-cps.git")
@@ -51,7 +51,7 @@
   :author "takeokunn <bararararatty@gmail.com>"
   :maintainer "takeokunn <bararararatty@gmail.com>"
   :license "MIT"
-  :version "0.1.0"
+  :version "0.1.1"
   :homepage "https://github.com/nerima-lisp/cl-cc-cps"
   :bug-tracker "https://github.com/nerima-lisp/cl-cc-cps/issues"
   :source-control (:git "https://github.com/nerima-lisp/cl-cc-cps.git")
