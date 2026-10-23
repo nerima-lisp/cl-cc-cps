@@ -245,3 +245,7 @@
               (cl-cc/cps:cps-transform-ast*
                (cl-cc/ast:make-ast-hole)))
             :to-throw (quote cl-cc/cps:unsupported-cps-ast))))
+
+(describe-sequential "Intentional failure control"
+  (it "fails a deliberately wrong assertion"
+    (expect 1 :to-equal 2)))
