@@ -156,63 +156,66 @@
       # with build caching.
       extraOutputs = ctx: {
         checks = {
-          orphan-tests = ctx.pkgs.runCommand "cl-cc-cps-orphan-tests" {
-            src = ctx.src;
-            nativeBuildInputs = [ ctx.pkgs.sbcl ];
-          } ''
-            cat > orphan-tests.lisp <<'LISP'
-            (require :asdf)
+          orphan-tests =
+            ctx.pkgs.runCommand "cl-cc-cps-orphan-tests"
+              {
+                src = ctx.src;
+                nativeBuildInputs = [ ctx.pkgs.sbcl ];
+              }
+              ''
+                cat > orphan-tests.lisp <<'LISP'
+                (require :asdf)
 
-            (defun component-files (tree)
-              (cond
-                ((consp tree)
-                 (if (and (eq (first tree) :file)
-                          (stringp (second tree)))
-                     (append (list (second tree))
-                             (component-files (cddr tree)))
-                     (append (component-files (first tree))
-                             (component-files (rest tree)))))
-                (t nil)))
+                (defun component-files (tree)
+                  (cond
+                    ((consp tree)
+                     (if (and (eq (first tree) :file)
+                              (stringp (second tree)))
+                         (append (list (second tree))
+                                 (component-files (cddr tree)))
+                         (append (component-files (first tree))
+                                 (component-files (rest tree)))))
+                    (t nil)))
 
-            (let* ((forms
-                     (with-open-file (stream (sb-ext:posix-getenv "ASD_FILE"))
-                       (let ((*read-eval* nil))
-                         (loop for form = (read stream nil :eof)
-                               until (eq form :eof)
-                               collect form))))
-                   (test-system
-                     (find-if
-                       (lambda (form)
-                         (and (consp form)
-                              (symbolp (first form))
-                              (string-equal (symbol-name (first form)) "DEFSYSTEM")
-                              (equal (second form) "cl-cc-cps/test")))
-                       forms))
-                   (component-names (component-files (getf (cddr test-system) :components)))
-                   (test-files
-                     (directory
-                       (merge-pathnames "*-test.lisp"
-                                        (uiop:ensure-directory-pathname
-                                          (sb-ext:posix-getenv "TEST_DIR")))))
-                   (orphans
-                     (remove-if
-                       (lambda (file)
-                         (member (pathname-name file) component-names :test #'string=))
-                       test-files)))
-              (when (null test-files)
-                (error "No candidate test files found under t/"))
-              (if orphans
-                  (progn
-                    (dolist (file orphans)
-                      (format *error-output* "orphan test file: t/~a.lisp~%"
-                              (pathname-name file)))
-                    (error "Found ~d orphan test file(s)" (length orphans)))
-                  (format t "Checked ~d test files; no orphans found.~%"
-                          (length test-files))))
-            LISP
-            ASD_FILE="$src/cl-cc-cps.asd" TEST_DIR="$src/t" sbcl --script orphan-tests.lisp
-            touch "$out"
-          '';
+                (let* ((forms
+                         (with-open-file (stream (sb-ext:posix-getenv "ASD_FILE"))
+                           (let ((*read-eval* nil))
+                             (loop for form = (read stream nil :eof)
+                                   until (eq form :eof)
+                                   collect form))))
+                       (test-system
+                         (find-if
+                           (lambda (form)
+                             (and (consp form)
+                                  (symbolp (first form))
+                                  (string-equal (symbol-name (first form)) "DEFSYSTEM")
+                                  (equal (second form) "cl-cc-cps/test")))
+                           forms))
+                       (component-names (component-files (getf (cddr test-system) :components)))
+                       (test-files
+                         (directory
+                           (merge-pathnames "*-test.lisp"
+                                            (uiop:ensure-directory-pathname
+                                              (sb-ext:posix-getenv "TEST_DIR")))))
+                       (orphans
+                         (remove-if
+                           (lambda (file)
+                             (member (pathname-name file) component-names :test #'string=))
+                           test-files)))
+                  (when (null test-files)
+                    (error "No candidate test files found under t/"))
+                  (if orphans
+                      (progn
+                        (dolist (file orphans)
+                          (format *error-output* "orphan test file: t/~a.lisp~%"
+                                  (pathname-name file)))
+                        (error "Found ~d orphan test file(s)" (length orphans)))
+                      (format t "Checked ~d test files; no orphans found.~%"
+                              (length test-files))))
+                LISP
+                ASD_FILE="$src/cl-cc-cps.asd" TEST_DIR="$src/t" sbcl --script orphan-tests.lisp
+                touch "$out"
+              '';
           paredit-lint = paredit-cli.lib.${ctx.system}.mkLintCheck {
             inherit (ctx) src;
             name = "cl-cc-cps-paredit-lint";
