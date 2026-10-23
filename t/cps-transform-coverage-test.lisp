@@ -232,3 +232,16 @@
                    (cons 'finish
                          (list (%cps-coverage-int 1)))))))
       (expect (%cps-transform-succeeds-p node) :to-be-truthy))))
+
+(describe-sequential "Additional CPS AST inputs"
+  (it "transforms ast-list into a runtime list"
+    (let* ((node (cl-cc/ast:make-ast-list
+                  :elements (list (cl-cc/ast:make-ast-int :value 1)
+                                  (cl-cc/ast:make-ast-int :value 2))))
+           (form (cl-cc/cps:cps-transform-ast* node)))
+      (expect (funcall (eval form) (function identity)) :to-equal (quote (1 2)))))
+  (it "reports ast-hole as unsupported"
+    (expect (lambda ()
+              (cl-cc/cps:cps-transform-ast*
+               (cl-cc/ast:make-ast-hole)))
+            :to-throw (quote cl-cc/cps:unsupported-cps-ast))))

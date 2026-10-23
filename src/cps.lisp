@@ -3,7 +3,7 @@
 ;;;; This module provides:
 ;;;; - S-expression based CPS transformation (minimal, for bootstrap)
 ;;;;
-;;;; CPS simplification helpers live in cps-simplify.lisp.
+;;;; CPS simplification and trampoline helpers are defined in this file.
 ;;;; AST-based CPS transformation with full special form support lives in
 ;;;; cps-ast*.lisp.
 

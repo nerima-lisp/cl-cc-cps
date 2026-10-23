@@ -6,16 +6,6 @@
 ;;;; in-tree reverse dependent is packages/compile, which keeps its own
 ;;;; integration tests against cl-cc/cps:: internals in the monorepo.
 ;;;;
-;;;; NOTE on src/cps-simplify.lisp, src/cps-trampoline.lisp and
-;;;; src/cps-trmc.lisp: these three files are carried over from the monorepo
-;;;; unchanged, but — exactly as in the monorepo's cl-cc-cps.asd — they are
-;;;; NOT listed in :components below. cps.lisp already defines every
-;;;; function these three files define (trmc-transform-defun-form,
-;;;; cps-trampoline-run, cps-simplify-form, ...), so the three files were
-;;;; already dead/orphaned in the monorepo before this extraction; carrying
-;;;; them here preserves that status quo rather than silently discarding or
-;;;; silently reviving them. See the extraction report for details.
-;;;;
 ;;;; Both systems live in this one file; there is no separate
 ;;;; cl-cc-cps-test.asd. System names are written as STRINGS rather than
 ;;;; #:symbols or :keywords, so that reading this file does not depend on the
@@ -65,6 +55,7 @@
    (:file "cps-trmc-test"))
   :perform (test-op (op system)
              (declare (ignore op system))
-             (uiop:symbol-call :cl-weave :run-all
-                               :reporter :spec
-                               :pass-with-no-tests nil)))
+             (unless (uiop:symbol-call :cl-weave :run-all
+                                       :reporter :spec
+                                       :pass-with-no-tests nil)
+               (error "cl-cc-cps tests failed."))))

@@ -37,6 +37,9 @@
 
 ;;; Tagbody and Go
 
+(defvar *cps-tagbody-environment* nil
+  "Lexical tag names mapped to their CPS label continuations.")
+
 (defun %lookup-cps-tag (tag)
   (or
     (cdr (assoc tag *cps-tagbody-environment* :test #'eq))
@@ -50,9 +53,6 @@
         stream
         "CPS GO references unknown tag ~S."
         (unbound-cps-tag-tag condition)))))
-
-(defvar *cps-tagbody-environment* nil
-  "Lexical tag names mapped to their CPS label continuations.")
 
 (defun cps-transform-tagbody-section (forms continue-form)
   "Transform one TAGBODY section, then invoke its fallthrough continuation."

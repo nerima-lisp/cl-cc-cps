@@ -192,6 +192,11 @@ then call the function with all evaluated arguments."
                                                   func)
                                               arg-syms))))))
 
+(defmethod cps-transform-ast ((node ast-list) k)
+  (cps-transform-ast
+   (make-ast-call :func (quote list) :args (ast-list-elements node))
+   k))
+
 ;;; ─── Entry Points ────────────────────────────────────────────────────────────
 
 (defun cps-transform-ast* (node)

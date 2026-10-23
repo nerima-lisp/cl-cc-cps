@@ -28,17 +28,6 @@ dependent is `packages/compile`.
 (cl-cc/cps:cps-transform-ast* some-ast-node)
 ```
 
-## A note on three source files
-
-`src/cps-simplify.lisp`, `src/cps-trampoline.lisp` and `src/cps-trmc.lisp`
-ship in this repository but are deliberately **not** listed in
-`cl-cc-cps.asd`'s `:components`. `src/cps.lisp` already defines every
-function these three files define — they were dead, unloaded duplicates
-already in the monorepo before this extraction (the same "double-definition
-trap" class of bug documented for other packages in this org). This
-extraction preserves that status quo rather than silently reviving or
-silently deleting them; see `cl-cc-cps.asd`'s header comment for detail.
-
 ## Install
 
 ```nix
@@ -57,7 +46,7 @@ than follow the default branch.
 ```sh
 nix develop      # SBCL with CL_SOURCE_REGISTRY already set
 nix run .#test    # run the test suite
-nix flake check   # tests + formatting + paredit lint, the same gate CI uses
+nix flake check   # tests + orphan-test check + formatting + paredit lint
 nix fmt           # format Nix sources (treefmt)
 ```
 
