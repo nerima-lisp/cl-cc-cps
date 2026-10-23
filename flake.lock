@@ -3,34 +3,34 @@
     "cl-cc-ast": {
       "flake": false,
       "locked": {
-        "lastModified": 1785484061,
-        "narHash": "sha256-UkonaEkOJr6SDHcu9vooVqY5X3kWK0+9vYps1K2sMhg=",
+        "lastModified": 1791795763,
+        "narHash": "sha256-Wh/Lhxr1VnebnTB+HE3/LrQqvarNzdZIAbeRwYSdF5U=",
         "owner": "nerima-lisp",
         "repo": "cl-cc-ast",
-        "rev": "25375954dd13037d608b8e427a6dd86588207153",
+        "rev": "a45c5acecfccb91a43f6a04251e8a5d6ec3d3213",
         "type": "github"
       },
       "original": {
         "owner": "nerima-lisp",
-        "ref": "v0.2.0",
         "repo": "cl-cc-ast",
+        "rev": "a45c5acecfccb91a43f6a04251e8a5d6ec3d3213",
         "type": "github"
       }
     },
     "cl-cc-bootstrap": {
       "flake": false,
       "locked": {
-        "lastModified": 1785472945,
-        "narHash": "sha256-SqFwuU4y+LrHtzVwpBzHlMoYuyODG0NWPBhronIm1Lk=",
+        "lastModified": 1791350360,
+        "narHash": "sha256-BSoM6zaVQKZoZggfwwszRyV6i0ToWtvA1H16l7+gFZw=",
         "owner": "nerima-lisp",
         "repo": "cl-cc-bootstrap",
-        "rev": "69e32386b11479cff06db145239a565d4858ea76",
+        "rev": "027f6c9826010c15789454e69abd2930738b50af",
         "type": "github"
       },
       "original": {
         "owner": "nerima-lisp",
-        "ref": "v0.1.0",
         "repo": "cl-cc-bootstrap",
+        "rev": "027f6c9826010c15789454e69abd2930738b50af",
         "type": "github"
       }
     },
@@ -59,16 +59,16 @@
     "cl-weave": {
       "flake": false,
       "locked": {
-        "lastModified": 1785662484,
-        "narHash": "sha256-GFChZBI8RbOnov3WCTT2jw0H/kBqYK0ig6i7ltzjnyU=",
+        "lastModified": 1790778646,
+        "narHash": "sha256-x2bYA/A2q9q1QOccPG1faD6J6Hn+/9YCd3xKQFrNefY=",
         "owner": "nerima-lisp",
         "repo": "cl-weave",
-        "rev": "a8a094226480b92a3789e7e48a2af5faa2e36326",
+        "rev": "32671560d3d15d4ecf33b9d8af862ea60737841b",
         "type": "github"
       },
       "original": {
         "owner": "nerima-lisp",
-        "ref": "v1.1.4",
+        "ref": "v1.4.0",
         "repo": "cl-weave",
         "type": "github"
       }

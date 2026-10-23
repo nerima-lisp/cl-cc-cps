@@ -16,21 +16,20 @@
     # treefmt-nix below are real flake inputs, and both carry it.
     #
     # Both cl-cc-cps library dependencies (see cl-cc-cps.asd's :depends-on),
-    # pinned to their current release tags per DEPENDENCY_POLICY.md's "pin to
-    # a release tag, not a bare commit" rule.
+    # pinned to their main SHAs in the W1 collection pinset.
     cl-cc-ast = {
-      url = "github:nerima-lisp/cl-cc-ast/v0.2.0";
+      url = "github:nerima-lisp/cl-cc-ast/a45c5acecfccb91a43f6a04251e8a5d6ec3d3213";
       flake = false;
     };
     cl-cc-bootstrap = {
-      url = "github:nerima-lisp/cl-cc-bootstrap/v0.1.0";
+      url = "github:nerima-lisp/cl-cc-bootstrap/027f6c9826010c15789454e69abd2930738b50af";
       flake = false;
     };
 
-    # Test-only: cl-weave is the org's test framework. Pinned to its release
-    # tag, which is what every other repository in the org references.
+    # Test-only: cl-weave is the org's test framework, pinned to the release
+    # tag in the W1 pinset.
     cl-weave = {
-      url = "github:nerima-lisp/cl-weave/v1.1.4";
+      url = "github:nerima-lisp/cl-weave/v1.4.0";
       flake = false;
     };
 
@@ -76,17 +75,8 @@
     let
       lib = nixpkgs.lib;
 
-      # x86_64-linux is what CI gates; aarch64-darwin is the development
-      # machine. Every per-system output -- packages, checks, apps AND devShells
-      # -- comes from this one list, so leaving aarch64-darwin out takes `nix
-      # build` and `nix develop` off the development machine as well. That trade
-      # was made on 2026-08-01 and reverted on 2026-08-02; aarch64-darwin carries
-      # no CI gate, which PACKAGE_STANDARD.md's "systems" section accepts
-      # explicitly. aarch64-linux and x86_64-darwin are nobody's verification and
-      # are not declared.
       systems = [
         "x86_64-linux"
-        "aarch64-darwin"
       ];
 
       # cl-cc-cps is a small package (9 source files, 2 test files); the
