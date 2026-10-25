@@ -57,14 +57,16 @@
   :depends-on ("cl-cc-cps/simplify" "cl-weave")
   :pathname "t/simplify"
   :serial t
-  :components ((:file "package")))
+  :components ((:file "package")
+               (:file "cps-simplify-tests")))
 
 (defsystem "cl-cc-cps/trampoline/test"
   :description "Tests for CPS trampoline helpers"
   :depends-on ("cl-cc-cps/trampoline" "cl-weave")
   :pathname "t/trampoline"
   :serial t
-  :components ((:file "package")))
+  :components ((:file "package")
+               (:file "cps-trampoline-tests")))
 
 (defsystem "cl-cc-cps/trmc/test"
   :description "Tests for tail recursion modulo cons"
@@ -72,7 +74,8 @@
   :pathname "t/trmc"
   :serial t
   :components ((:file "package")
-               (:file "cps-trmc-test")))
+               (:file "cps-trmc-test")
+               (:file "cps-migrated-tests")))
 
 (defsystem "cl-cc-cps/transform/test"
   :description "Tests for CPS transformation"
@@ -80,6 +83,12 @@
   :pathname "t/transform"
   :serial t
   :components ((:file "package")
+               (:file "cps-tests")
+               (:file "cps-ast-tests")
+               (:file "cps-ast-extended-tests")
+               (:file "cps-ast-semantic-tests")
+               (:file "cps-ast-functional-tests")
+               (:file "cps-ast-transform-tests")
                (:file "cps-boundary-test")
                (:file "cps-transform-coverage-test")))
 
