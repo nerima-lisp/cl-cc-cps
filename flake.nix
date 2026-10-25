@@ -157,7 +157,7 @@
         {
           checks = {
             feature-lint = cl.mkFeatureLintCheck {
-              inherit (ctx) src;
+              src = ./.;
               featureDefinitions = "nix/feature-dependencies.sexp";
               glossary = "docs/src/reference/glossary.md";
               glossaryHeadingPrefix = "## ";
@@ -182,7 +182,7 @@
               name = "cl-cc-cps-paredit-lint";
             };
             orphan-tests = cl.mkOrphanTestCheck {
-              inherit (ctx) src;
+              src = ./.;
               testRoots = [
                 "t/simplify"
                 "t/trampoline"
