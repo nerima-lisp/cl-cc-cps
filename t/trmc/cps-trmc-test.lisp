@@ -33,7 +33,7 @@
                      (if (zerop n)
                          nil
                          (cons n (trmc-simple (1- n))))))
-           (rewritten (cl-cc/cps/trmc::trmc-transform-defun-form source)))
+           (rewritten (cl-cc/cps/trmc:trmc-transform-defun-form source)))
       ;; The output must differ from the input and carry the accumulator shape.
       (expect (%trmc-rewritten-p source rewritten) :to-be-truthy)
       ;; The rewritten form is still a DEFUN with the same name.
@@ -48,7 +48,7 @@
                      (if (zerop n)
                          acc
                          (trmc-sum (1- n) (+ acc n)))))
-           (rewritten (cl-cc/cps/trmc::trmc-transform-defun-form source)))
+           (rewritten (cl-cc/cps/trmc:trmc-transform-defun-form source)))
       ;; No TRMC pattern found — form is returned unchanged.
       (expect rewritten :to-equal source)
       ;; Sanity-check: no labels injected.
@@ -59,7 +59,7 @@
                      (if (zerop n)
                          nil
                          (cons n (cons (- n) (trmc-two-heads (1- n)))))))
-           (rewritten (cl-cc/cps/trmc::trmc-transform-defun-form source)))
+           (rewritten (cl-cc/cps/trmc:trmc-transform-defun-form source)))
       (expect (%trmc-rewritten-p source rewritten) :to-be-truthy)
       ;; Running the rewritten function produces the right flat list.
       (eval rewritten)
@@ -70,8 +70,8 @@
                      (if (zerop n)
                          nil
                          (cons n (trmc-idem (1- n))))))
-           (once   (cl-cc/cps/trmc::trmc-transform-defun-form source))
-           (twice  (cl-cc/cps/trmc::trmc-transform-defun-form once)))
+           (once   (cl-cc/cps/trmc:trmc-transform-defun-form source))
+           (twice  (cl-cc/cps/trmc:trmc-transform-defun-form once)))
       ;; The first application transforms the form.
       (expect (%trmc-rewritten-p source once) :to-be-truthy)
       ;; The second application must not alter the already-transformed form.
@@ -85,7 +85,7 @@
                         nil
                         (cons n (trmc-disabled (1- n)))))))
       (let ((cl-cc/cps/trmc:*enable-trmc* nil))
-        (expect (cl-cc/cps/trmc::trmc-transform-defun-form source) :to-equal source))))
+        (expect (cl-cc/cps/trmc:trmc-transform-defun-form source) :to-equal source))))
 
   ;; The guard in trmc-transform-defun-form is (every #'symbolp lambda-list).
   ;; Lambda-list elements that are lists (default forms) cause the guard to
@@ -109,4 +109,4 @@
       "leaves ~A unchanged (non-simple lambda-list or non-defun)"
       (label source)
     (declare (ignore label))
-    (expect (cl-cc/cps/trmc::trmc-transform-defun-form source) :to-equal source)))
+    (expect (cl-cc/cps/trmc:trmc-transform-defun-form source) :to-equal source)))
