@@ -1,13 +1,9 @@
-;;;; tests/unit/compile/cps-ast-extended-tests.lisp
-;;;; Unit tests for src/compile/cps-ast-extended.lisp
+;;;; t/transform/cps-ast-extended-tests.lisp
+;;;; Unit tests for src/transform/cps-ast-extended.lisp
 ;;;;
-;;;; Covers: cps-transform-ast for ast-quote, ast-setq, ast-the, ast-values,
-;;;;   ast-apply, ast-call (general calls), ast-defun, ast-defmacro,
-;;;;   ast-defclass, ast-defgeneric, ast-defmethod; entry points cps-transform-ast*,
-;;;;   cps-transform*, cps-transform-eval.
-;;;;
-;;;; Tests inspect the *structure* of the produced S-expression rather than
-;;;; evaluating it (which would require a full runtime environment).
+;;;; Covers structural tests for AST quote, the, setq, values, apply, call,
+;;;; defun, defmacro, and defgeneric nodes; transformation entry points and
+;;;; lambda-list lowering. The cps-transform-eval cases check returned values.
 
 (in-package :cl-cc/cps/transform/test)
 

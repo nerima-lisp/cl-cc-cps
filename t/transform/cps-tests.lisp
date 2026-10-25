@@ -1,11 +1,7 @@
-;;;; tests/unit/core/cps-tests.lisp — CPS Transformation tests
+;;;; CPS transformation tests
 ;;;;
-;;;; Covers:
-;;;;   1. Helper functions: eval-cps-ast, run-cps-ast, is-cps-lambda
-;;;;   2. Structure predicate tests (single-param-lambda-p, funcall-of-single-lambda-p, etc.)
-;;;;   3. S-expression CPS bootstrap transformer — semantic evaluation
-;;;;
-;;;; AST-based CPS tests continue in cps-ast-tests.lisp.
+;;;; Defines helpers shared with CPS AST tests.
+;;;; Covers semantic tests for the S-expression bootstrap transformer.
 
 (in-package :cl-cc/cps/transform/test)
 
@@ -46,10 +42,6 @@ Returns a function that takes a continuation."
   "Evaluate FORM and return SYMBOL's function object."
   (eval form)
   (symbol-function symbol))
-
-;;; ─────────────────────────────────────────────────────────────────────────
-;;; Structure predicate tests (extracted for readability)
-;;; ─────────────────────────────────────────────────────────────────────────
 
 ;;; ─────────────────────────────────────────────────────────────────────────
 ;;; S-expression CPS (bootstrap transformer)
