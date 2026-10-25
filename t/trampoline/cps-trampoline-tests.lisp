@@ -6,10 +6,6 @@
                           (%trampoline-form-contains-p (cdr form) sym)))
         (t nil)))
 
-(it-sequential "cps-sexp-transform-emits-trampoline-thunk"
-  (expect (%trampoline-form-contains-p (cl-cc/cps/transform:cps-transform '(+ 1 2))
-                                      :cps-trampoline-thunk) :to-be-truthy))
-
 (it-sequential "cps-trampoline-run-forces-tail-thunks"
   (let ((thunk (cl-cc/cps/trampoline::make-cps-trampoline-thunk
                 :function (lambda ()

@@ -95,3 +95,7 @@ Returns a function that takes a continuation."
     (let ((fn (cl-cc/cps/transform:cps-transform-eval expr)))
     (expect (funcall fn #'identity) :to-equal expected))))
 
+(it-sequential "cps-sexp-transform-emits-trampoline-thunk"
+  (expect (%cps-form-contains-p (cl-cc/cps/transform:cps-transform '(+ 1 2))
+                                      :cps-trampoline-thunk) :to-be-truthy))
+
