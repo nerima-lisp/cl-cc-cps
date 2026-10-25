@@ -33,15 +33,9 @@
       flake = false;
     };
 
-    # The org flake preset. Everything this file would otherwise spell out
-    # by hand — `.asd` version extraction, `forAllSystems`, the treefmt eval
-    # wired to both `formatter` and `checks.formatting`, the run-tests.lisp
-    # gate, the `apps.test`/`apps.default` pair, the devShell and the
-    # overlay — is one `mkPackageFlake` call below. Pinned to a release TAG:
-    # a bare `github:nerima-lisp/cl-nix-forge` follows that repository's
-    # default branch and would change this build without warning.
+    # The org flake preset and shared feature/test check builders.
     cl-nix-forge = {
-      url = "github:nerima-lisp/cl-nix-forge/v0.4.0";
+      url = "github:nerima-lisp/cl-nix-forge/v0.7.4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -100,6 +94,7 @@
       # Required, and it must be a path literal rather than `self`: a
       # flake's `self` is string-like and `lib.fileset` refuses it.
       root = ./.;
+      sourceInclude = [ ./t/export-surface.txt ];
 
       meta = {
         description = "CPS transformation (continuation-passing style conversion) for cl-cc, extracted from the monorepo";
@@ -154,73 +149,54 @@
       # Granularity lives here, NOT in extra GitHub Actions jobs: `nix flake
       # check` evaluates each attribute as its own derivation, in parallel,
       # with build caching.
-      extraOutputs = ctx: {
-        checks = {
-          orphan-tests =
-            ctx.pkgs.runCommand "cl-cc-cps-orphan-tests"
-              {
-                src = ctx.src;
-                nativeBuildInputs = [ ctx.pkgs.sbcl ];
-              }
-              ''
-                cat > orphan-tests.lisp <<'LISP'
-                (require :asdf)
-
-                (defun component-files (tree)
-                  (cond
-                    ((consp tree)
-                     (if (and (eq (first tree) :file)
-                              (stringp (second tree)))
-                         (append (list (second tree))
-                                 (component-files (cddr tree)))
-                         (append (component-files (first tree))
-                                 (component-files (rest tree)))))
-                    (t nil)))
-
-                (let* ((forms
-                         (with-open-file (stream (sb-ext:posix-getenv "ASD_FILE"))
-                           (let ((*read-eval* nil))
-                             (loop for form = (read stream nil :eof)
-                                   until (eq form :eof)
-                                   collect form))))
-                       (test-system
-                         (find-if
-                           (lambda (form)
-                             (and (consp form)
-                                  (symbolp (first form))
-                                  (string-equal (symbol-name (first form)) "DEFSYSTEM")
-                                  (equal (second form) "cl-cc-cps/test")))
-                           forms))
-                       (component-names (component-files (getf (cddr test-system) :components)))
-                       (test-files
-                         (directory
-                           (merge-pathnames "*-test.lisp"
-                                            (uiop:ensure-directory-pathname
-                                              (sb-ext:posix-getenv "TEST_DIR")))))
-                       (orphans
-                         (remove-if
-                           (lambda (file)
-                             (member (pathname-name file) component-names :test #'string=))
-                           test-files)))
-                  (when (null test-files)
-                    (error "No candidate test files found under t/"))
-                  (if orphans
-                      (progn
-                        (dolist (file orphans)
-                          (format *error-output* "orphan test file: t/~a.lisp~%"
-                                  (pathname-name file)))
-                        (error "Found ~d orphan test file(s)" (length orphans)))
-                      (format t "Checked ~d test files; no orphans found.~%"
-                              (length test-files))))
-                LISP
-                ASD_FILE="$src/cl-cc-cps.asd" TEST_DIR="$src/t" sbcl --script orphan-tests.lisp
-                touch "$out"
-              '';
-          paredit-lint = paredit-cli.lib.${ctx.system}.mkLintCheck {
-            inherit (ctx) src;
-            name = "cl-cc-cps-paredit-lint";
+      extraOutputs =
+        ctx:
+        let
+          cl = ctx.cl;
+        in
+        {
+          checks = {
+            feature-lint = cl.mkFeatureLintCheck {
+              src = ./.;
+              featureDefinitions = "nix/feature-dependencies.sexp";
+              glossary = "docs/src/reference/glossary.md";
+              glossaryHeadingPrefix = "## ";
+              exportSurface = "t/export-surface.txt";
+              mode = "transition";
+              legacyInternalRefs = "t/legacy-internal-refs.sexp";
+              forbiddenNames = [
+                "phases"
+                "misc"
+                "utils"
+                "helpers"
+              ];
+              numberedPrefixes = [
+                "FR-"
+                "W"
+              ];
+              packagePrefix = "cl-cc/cps/";
+              infraSuffix = "/infra";
+            };
+            paredit-lint = paredit-cli.lib.${ctx.system}.mkLintCheck {
+              inherit (ctx) src;
+              name = "cl-cc-cps-paredit-lint";
+            };
+            orphan-tests = cl.mkOrphanTestCheck {
+              src = ./.;
+              testRoots = [
+                "t/simplify"
+                "t/trampoline"
+                "t/trmc"
+                "t/transform"
+              ];
+              testSystems = [
+                "cl-cc-cps/simplify/test"
+                "cl-cc-cps/trampoline/test"
+                "cl-cc-cps/trmc/test"
+                "cl-cc-cps/transform/test"
+              ];
+            };
           };
         };
-      };
     };
 }

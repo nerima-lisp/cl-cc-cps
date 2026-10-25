@@ -8,7 +8,7 @@
 ;;;; (label type-label node-form) case shape collapses to a plain
 ;;;; (label node-form) pair here.
 
-(in-package :cl-cc-cps/test)
+(in-package :cl-cc/cps/transform/test)
 
 (defun %cps-coverage-int (&optional (value 1))
   "Build a minimal integer AST node for CPS coverage fixtures."
