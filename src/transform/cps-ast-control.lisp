@@ -1,4 +1,4 @@
-(in-package :cl-cc/cps)
+(in-package :cl-cc/cps/transform)
 
 ;;; Block and Return-From
 

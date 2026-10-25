@@ -1,4 +1,4 @@
-(in-package :cl-cc/cps)
+(in-package :cl-cc/cps/transform)
 ;;; ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ;;; CPS — OOP / Mutation AST Node Transforms
 ;;;

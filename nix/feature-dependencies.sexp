@@ -1,0 +1,28 @@
+((:feature "transform"
+  :source-dirs ("src/transform")
+  :test-dir "t/transform"
+  :facade-packages ("cl-cc/cps")
+  :domain-package "cl-cc/cps/transform"
+  :infra-package nil
+  :depends-on ("simplify" "trampoline" "trmc"))
+ (:feature "simplify"
+  :source-dirs ("src/simplify")
+  :test-dir "t/simplify"
+  :facade-packages ("cl-cc/cps")
+  :domain-package "cl-cc/cps/simplify"
+  :infra-package nil
+  :depends-on ())
+ (:feature "trampoline"
+  :source-dirs ("src/trampoline")
+  :test-dir "t/trampoline"
+  :facade-packages ("cl-cc/cps")
+  :domain-package "cl-cc/cps/trampoline"
+  :infra-package nil
+  :depends-on ())
+ (:feature "trmc"
+  :source-dirs ("src/trmc")
+  :test-dir "t/trmc"
+  :facade-packages ("cl-cc/cps")
+  :domain-package "cl-cc/cps/trmc"
+  :infra-package nil
+  :depends-on ()))
